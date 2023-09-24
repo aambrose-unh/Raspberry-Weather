@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import sys
-import Adafruit_DHT
+import board
+import adafruit_dht
 
 import subprocess 
 import re 
@@ -13,8 +14,8 @@ databaseUsername="YOUR USERNAME, USUALLY ROOT"
 databasePassword="YOUR PASSWORD!" 
 databaseName="WordpressDB" #do not change unless you named the Wordpress database with some other name
 
-sensor=Adafruit_DHT.DHT22 #if not using DHT22, replace with Adafruit_DHT.DHT11 or Adafruit_DHT.AM2302
-pinNum=4 #if not using pin number 4, change here
+pinNum = board.D4 #if not using pin number 4, change here
+sensor = adafruit_dht.DHT22(pinNum)
 
 def saveToDatabase(temperature,humidity):
 
@@ -37,7 +38,29 @@ def saveToDatabase(temperature,humidity):
 
 def readInfo():
 
-	humidity, temperature = Adafruit_DHT.read_retry(sensor, pinNum)#read_retry - retry getting temperatures for 15 times
+	num_retries = 15
+	while num_retries > 0:
+	    print(f"Number of retries remaining: {num_retries}")
+	    try:
+	        # Print the values to the serial port
+	        temperature_c = sensory.temperature
+	        temperature_f = temperature_c * (9 / 5) + 32
+	        humidity = sensory.humidity
+	        print(
+	            "Temp: {:.1f} F / {:.1f} C    Humidity: {}% ".format(
+	                temperature_f, temperature_c, humidity
+	            )
+	        )
+		continue # do not repeat if successful
+	
+	    except RuntimeError as error:
+	        # Errors happen fairly often, DHT's are hard to read, just keep going
+	        print(error.args[0])
+	        time.sleep(2.0)
+		num_retries -= 1
+	    except Exception as error:
+	        sensory.exit()
+	        raise error
 
 	print "Temperature: %.1f C" % temperature
 	print "Humidity:    %s %%" % humidity
