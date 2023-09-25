@@ -10,9 +10,9 @@ import time
 import MySQLdb as mdb 
 import datetime
 
-databaseUsername="YOUR USERNAME, USUALLY ROOT"
-databasePassword="YOUR PASSWORD!" 
-databaseName="WordpressDB" #do not change unless you named the Wordpress database with some other name
+databaseUsername = os.getenv("DB_USER")
+databasePassword = os.getenv("DB_PASSWD")
+databaseName = "WordpressDB" #do not change unless you named the Wordpress database with some other name
 
 pinNum = board.D4 #if not using pin number 4, change here
 sensor = adafruit_dht.DHT22(pinNum)
