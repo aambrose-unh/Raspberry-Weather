@@ -32,7 +32,7 @@ def saveToDatabase(temperature,humidity):
 		
 		cur.execute("INSERT INTO temperatures (temperature,humidity, dateMeasured, hourMeasured) VALUES (%s,%s,%s,%s)",(temperature,humidity,currentDate, minutes))
 	
-		print "Saved temperature"
+		print("Saved temperature")
 		return "true"
 
 
