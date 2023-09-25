@@ -20,18 +20,18 @@ sensor = adafruit_dht.DHT22(pinNum)
 def saveToDatabase(temperature,humidity):
 
 	con=mdb.connect("localhost", databaseUsername, databasePassword, databaseName)
-        currentDate=datetime.datetime.now().date()
-
-        now=datetime.datetime.now()
-        midnight=datetime.datetime.combine(now.date(),datetime.time())
-        minutes=((now-midnight).seconds)/60 #minutes after midnight, use datead$
-
+	currentDate=datetime.datetime.now().date()
 	
-        with con:
-                cur=con.cursor()
+	now=datetime.datetime.now()
+	midnight=datetime.datetime.combine(now.date(),datetime.time())
+	minutes=((now-midnight).seconds)/60 #minutes after midnight, use datead$
+	
+	
+	with con:
+		cur=con.cursor()
 		
-                cur.execute("INSERT INTO temperatures (temperature,humidity, dateMeasured, hourMeasured) VALUES (%s,%s,%s,%s)",(temperature,humidity,currentDate, minutes))
-
+		cur.execute("INSERT INTO temperatures (temperature,humidity, dateMeasured, hourMeasured) VALUES (%s,%s,%s,%s)",(temperature,humidity,currentDate, minutes))
+	
 		print "Saved temperature"
 		return "true"
 
