@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "raspberry-weather"
+version = "0.1.0"
+description = ""
+authors = ["aambrose-unh <aambrose.unh@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8.1"
+sqlalchemy = "^2.0.21"
+pymysql = "^1.1.0"
+adafruit_dht = "1.4.0"
+board = "1.0"
+
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^6.1.0"
+black = "^23.9.1"
+pylance = "^0.7.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

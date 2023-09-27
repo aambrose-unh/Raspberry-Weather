@@ -1,62 +1,86 @@
 #!/usr/bin/python
 import sys
-import Adafruit_DHT
+import board
+import adafruit_dht
 
 import subprocess 
 import re 
 import os 
 import time 
-import MySQLdb as mdb 
+import pymysql as mdb 
 import datetime
 
-databaseUsername="YOUR USERNAME, USUALLY ROOT"
-databasePassword="YOUR PASSWORD!" 
-databaseName="WordpressDB" #do not change unless you named the Wordpress database with some other name
+databaseUsername = os.getenv("DB_USER")
+databasePassword = os.getenv("DB_PASSWD")
+databaseName = "WordpressDB" #do not change unless you named the Wordpress database with some other name
 
-sensor=Adafruit_DHT.DHT22 #if not using DHT22, replace with Adafruit_DHT.DHT11 or Adafruit_DHT.AM2302
-pinNum=4 #if not using pin number 4, change here
+pinNum = board.D4 #if not using pin number 4, change here
+sensor = adafruit_dht.DHT22(pinNum)
 
 def saveToDatabase(temperature,humidity):
 
 	con=mdb.connect("localhost", databaseUsername, databasePassword, databaseName)
-        currentDate=datetime.datetime.now().date()
-
-        now=datetime.datetime.now()
-        midnight=datetime.datetime.combine(now.date(),datetime.time())
-        minutes=((now-midnight).seconds)/60 #minutes after midnight, use datead$
-
+	currentDate=datetime.datetime.now().date()
 	
-        with con:
-                cur=con.cursor()
+	now=datetime.datetime.now()
+	midnight=datetime.datetime.combine(now.date(),datetime.time())
+	minutes=((now-midnight).seconds)/60 #minutes after midnight, use datead$
+	
+	
+	with con:
+		cur=con.cursor()
 		
-                cur.execute("INSERT INTO temperatures (temperature,humidity, dateMeasured, hourMeasured) VALUES (%s,%s,%s,%s)",(temperature,humidity,currentDate, minutes))
-
-		print "Saved temperature"
+		cur.execute("INSERT INTO temperatures (temperature,humidity, dateMeasured, hourMeasured) VALUES (%s,%s,%s,%s)",(temperature,humidity,currentDate, minutes))
+	
+		print("Saved temperature")
 		return "true"
 
 
 def readInfo():
 
-	humidity, temperature = Adafruit_DHT.read_retry(sensor, pinNum)#read_retry - retry getting temperatures for 15 times
+	num_retries = 15
+	while num_retries > 0:
+	    print(f"Number of retries remaining: {num_retries}")
+		try:
+			# Print the values to the serial port
+			temperature_c = sensor.temperature
+			temperature_f = temperature_c * (9 / 5) + 32
+			humidity = sensor.humidity
+			print(
+				"Temp: {:.1f} F / {:.1f} C    Humidity: {}% ".format(
+					temperature_f, temperature_c, humidity
+				)
+			)
+			continue # do not repeat if successful
+	
+		except RuntimeError as error:
+			# Errors happen fairly often, DHT's are hard to read, just keep going
+			print(error.args[0])
+			time.sleep(2.0)
+		num_retries -= 1
 
-	print "Temperature: %.1f C" % temperature
-	print "Humidity:    %s %%" % humidity
+		except Exception as error:
+			sensor.exit()
+			raise error
+
+	print("Temperature: %.1f C" % temperature)
+	print("Humidity:    %s %%" % humidity)
 
 	if humidity is not None and temperature is not None:
 		return saveToDatabase(temperature,humidity) #success, save the readings
 	else:
-		print 'Failed to get reading. Try again!'
+		print('Failed to get reading. Try again!')
 		sys.exit(1)
 
 
 #check if table is created or if we need to create one
 try:
-	queryFile=file("createTable.sql","r")
+	queryFile=open("createTable.sql","r")
 
 	con=mdb.connect("localhost", databaseUsername,databasePassword,databaseName)
-        currentDate=datetime.datetime.now().date()
+	currentDate=datetime.datetime.now().date()
 
-        with con:
+	with con:
 		line=queryFile.readline()
 		query=""
 		while(line!=""):
@@ -66,9 +90,9 @@ try:
 		cur=con.cursor()
 		cur.execute(query)	
 
-        	#now rename the file, because we do not need to recreate the table everytime this script is run
-		queryFile.close()
-        	os.rename("createTable.sql","createTable.sql.bkp")
+		#now rename the file, because we do not need to recreate the table everytime this script is run
+	queryFile.close()
+	os.rename("createTable.sql","createTable.sql.bkp")
 	
 
 except IOError:
