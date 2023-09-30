@@ -8,6 +8,10 @@ import time
 import pymysql as mdb
 import datetime
 
+import logging
+
+logger = logging.Logger("get_info")
+
 databaseUsername = os.getenv("DB_USER")
 databasePassword = os.getenv("DB_PASSWD")
 databaseName = "WordpressDB"  # do not change unless you named the Wordpress database with some other name
@@ -17,6 +21,7 @@ sensor = adafruit_dht.DHT22(pinNum)
 
 
 def saveToDatabase(temperature, humidity):
+    logger.info("Saving to database")
     con = mdb.connect("localhost", databaseUsername, databasePassword, databaseName)
     currentDate = datetime.datetime.now().date()
 
@@ -24,9 +29,10 @@ def saveToDatabase(temperature, humidity):
     midnight = datetime.datetime.combine(now.date(), datetime.time())
     minutes = ((now - midnight).seconds) / 60  # minutes after midnight, use datead$
 
+	logger.info("Create db connection")
     with con:
         cur = con.cursor()
-
+		logger.info("Inserting record")
         cur.execute(
             "INSERT INTO temperatures (temperature,humidity, dateMeasured, hourMeasured) VALUES (%s,%s,%s,%s)",
             (temperature, humidity, currentDate, minutes),
@@ -50,7 +56,7 @@ def readInfo():
                     temperature_f, temperature_c, humidity
                 )
             )
-            continue  # do not repeat if successful
+            break  # do not repeat if successful
 
         except RuntimeError as error:
             # Errors happen fairly often, DHT's are hard to read, just keep going
@@ -74,8 +80,10 @@ def readInfo():
 
 # check if table is created or if we need to create one
 try:
+    logger.info("Open sql file")
     queryFile = open("createTable.sql", "r")
 
+	logger.info("Create db connection to create table")
     con = mdb.connect("localhost", databaseUsername, databasePassword, databaseName)
     currentDate = datetime.datetime.now().date()
 
