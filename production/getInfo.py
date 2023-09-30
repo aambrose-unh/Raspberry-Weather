@@ -90,7 +90,12 @@ try:
     queryFile = open("createTable.sql", "r")
 
     logger.info("Create db connection to create table")
-    con = mdb.connect("localhost", databaseUsername, databasePassword, databaseName)
+    con = mdb.connect(
+        host="localhost",
+        user=databaseUsername,
+        password=databasePassword,
+        database=databaseName,
+    )
     currentDate = datetime.datetime.now().date()
 
     with con:
@@ -109,7 +114,10 @@ try:
 
 
 except IOError:
+    logger.info("Temperature table already present")
     pass  # table has already been created
+except Exception as e:
+    logger.info(f"Error {e}. Occured during table creation")
 
 
 status = readInfo()  # get the readings
