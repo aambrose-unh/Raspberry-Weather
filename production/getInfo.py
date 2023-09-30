@@ -6,6 +6,7 @@ import adafruit_dht
 import os
 import time
 import pymysql as mdb
+import pymysql.cursors
 import datetime
 
 import logging
@@ -22,7 +23,12 @@ sensor = adafruit_dht.DHT22(pinNum)
 
 def saveToDatabase(temperature, humidity):
     logger.info("Saving to database")
-    con = mdb.connect("localhost", databaseUsername, databasePassword, databaseName)
+    con = mdb.connect(
+        host="localhost",
+        user=databaseUsername,
+        password=databasePassword,
+        database=databaseName,
+    )
     currentDate = datetime.datetime.now().date()
 
     now = datetime.datetime.now()
