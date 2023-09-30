@@ -85,38 +85,4 @@ def readInfo():
 
 
 if __name__ == "__main__":
-    # check if table is created or if we need to create one
-    try:
-        logger.info("Open sql file")
-        queryFile = open("createTable.sql", "r")
-
-        logger.info("Create db connection to create table")
-        con = mdb.connect(
-            host="localhost",
-            user=databaseUsername,
-            password=databasePassword,
-            database=databaseName,
-        )
-        currentDate = datetime.datetime.now().date()
-
-        with con:
-            line = queryFile.readline()
-            query = ""
-            while line != "":
-                query += line
-                line = queryFile.readline()
-
-            cur = con.cursor()
-            cur.execute(query)
-
-            # now rename the file, because we do not need to recreate the table everytime this script is run
-        queryFile.close()
-        os.rename("createTable.sql", "createTable.sql.bkp")
-
-    except IOError:
-        logger.info("Temperature table already present")
-        pass  # table has already been created
-    except Exception as e:
-        logger.info(f"Error {e}. Occured during table creation")
-
     status = readInfo()  # get the readings
