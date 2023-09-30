@@ -29,10 +29,10 @@ def saveToDatabase(temperature, humidity):
     midnight = datetime.datetime.combine(now.date(), datetime.time())
     minutes = ((now - midnight).seconds) / 60  # minutes after midnight, use datead$
 
-	logger.info("Create db connection")
+    logger.info("Create db connection")
     with con:
         cur = con.cursor()
-		logger.info("Inserting record")
+        logger.info("Inserting record")
         cur.execute(
             "INSERT INTO temperatures (temperature,humidity, dateMeasured, hourMeasured) VALUES (%s,%s,%s,%s)",
             (temperature, humidity, currentDate, minutes),
@@ -83,7 +83,7 @@ try:
     logger.info("Open sql file")
     queryFile = open("createTable.sql", "r")
 
-	logger.info("Create db connection to create table")
+    logger.info("Create db connection to create table")
     con = mdb.connect("localhost", databaseUsername, databasePassword, databaseName)
     currentDate = datetime.datetime.now().date()
 
