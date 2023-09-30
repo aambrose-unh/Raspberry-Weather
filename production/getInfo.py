@@ -11,6 +11,8 @@ import datetime
 
 import logging
 
+logging.basicConfig()
+
 logger = logging.Logger("get_info")
 
 databaseUsername = os.getenv("DB_USER")
