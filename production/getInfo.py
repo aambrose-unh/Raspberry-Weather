@@ -49,10 +49,11 @@ def saveToDatabase(temperature, humidity):
     logger.info("Create db connection")
     with con:
         cur = con.cursor()
-        logger.info("Inserting record")
+        q = f""""INSERT INTO temperatures (temperature,humidity, dateMeasured, hourMeasured)
+        VALUES ({temperature},{humidity},{currentDate},{minutes});"""
+        logger.info(f"Inserting record {q}")
         cur.execute(
-            "INSERT INTO temperatures (temperature,humidity, dateMeasured, hourMeasured) VALUES (%s,%s,%s,%s)",
-            (temperature, humidity, currentDate, minutes),
+            q,
         )
 
         print("Saved temperature")
